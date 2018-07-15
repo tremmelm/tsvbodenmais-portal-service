@@ -2,11 +2,12 @@ var jwt = require('jsonwebtoken');
 var bcrypt = require('bcryptjs');
 var config = require('./config');
 var express = require('express');
-var cors = require('cors')
+var cors = require('cors');
 var app = express();
 var bodyParser = require('body-parser');
 
-app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(cors());
 
 app.post('/login', function (req, res) {
 	
