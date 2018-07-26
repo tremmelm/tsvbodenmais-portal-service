@@ -3,6 +3,7 @@ var bcrypt = require('bcryptjs');
 var config = require('./config');
 var express = require('express');
 var cors = require('cors');
+var fs = require('fs');
 var app = express();
 var bodyParser = require('body-parser');
 
@@ -34,12 +35,27 @@ app.post('/login', function (req, res) {
 })
 
 app.get('/getRoster', (req, res) => {
-   var token = req.headers['authorization'];
-   if (!token) {
+   var readRoster = () => {fs.readFile('roster.json', (err, data) => {
+					res.writeHead(200, {'Content-Type': 'application/json'});
+					res.write(data);
+					res.end();
+   })};
+	
+	handleAuthtentication(req, res, readRoster);
+})
+
+app.post('/updateRoster', (req, res) => {
+	
+})
+
+function handleAuthtentication(req, res, callback){
+	var token = req.headers['authorization'];
+	console.log(token);
+	if (!token) {
 		res.status(401).send({ auth: false, message: 'No token provided.' });
 	}
 	
-   token = token.replace('Bearer ', '');
+	token = token.replace('Bearer ', '');
 
 	jwt.verify(token, config.secret, function(err, decoded) {		
 		if (err) {
@@ -47,19 +63,14 @@ app.get('/getRoster', (req, res) => {
 		}
 		else{
 			if(decoded.id){
-				console.log('authentication succeeded');
+				 callback();
 			}
 			else{
-				console.log('authentication failed');
+				res.status(500).send({ auth: false, message: 'Failed to authenticate token.' }); //TODO: change to internal Error 400
 			}
 		}
 	});
-  
-})
-
-app.post('/updateRoster', (req, res) => {
-   
-})
+}
 
 
 var server = app.listen(8081, function () {
